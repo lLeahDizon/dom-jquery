@@ -1,3 +1,3 @@
-const x1 = jQuery(".test").find(".child");
+const x = jQuery(".test").find(".child");
 
-console.log(x1);
+x.each((div) => console.log(div));

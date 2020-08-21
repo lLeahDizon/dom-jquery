@@ -118,10 +118,38 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   return newRequire;
 })({"jquery.js":[function(require,module,exports) {
-window.jQuery = function (selector) {
-  var elements = document.querySelectorAll(selector); // api 可以操作 elements
+window.jQuery = function (selectorOrArray) {
+  var elements;
+
+  if (typeof selectorOrArray === "string") {
+    elements = document.querySelectorAll(selectorOrArray);
+  } else if (selectorOrArray instanceof Array) {
+    elements = selectorOrArray;
+  } // api 可以操作 elements
+
 
   return {
+    find: function find(selector) {
+      var array = [];
+
+      for (var i = 0; i < elements.length; i++) {
+        array = array.concat(Array.from(elements[i].querySelectorAll(selector)));
+      }
+
+      array.oldApi = this; //this 就是Api
+
+      return jQuery(array);
+    },
+    each: function each(fn) {
+      for (var i = 0; i < elements.length; i++) {
+        fn.call(null, elements[i], i);
+      }
+
+      return this;
+    },
+    parent: function parent() {
+      elements;
+    },
     // 闭包：函数访问外部的变量
     addClass: function addClass(className) {
       for (var i = 0; i < elements.length; i++) {
@@ -131,14 +159,9 @@ window.jQuery = function (selector) {
 
       return this;
     },
-    find: function find(selector) {
-      var array = [];
-
-      for (var i = 0; i < elements.length; i++) {
-        array = array.concat(Array.from(elements[i].querySelectorAll(selector)));
-      }
-
-      return array;
+    oldApi: selectorOrArray.oldApi,
+    end: function end() {
+      return this.oldApi;
     }
   };
 };
@@ -170,7 +193,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "2849" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "6014" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
