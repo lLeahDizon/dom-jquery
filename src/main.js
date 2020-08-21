@@ -1,3 +1,3 @@
-const x = jQuery(".test").find(".child");
+const x = jQuery(".test");
 
-x.each((div) => console.log(div));
+x.previousNode().print();
