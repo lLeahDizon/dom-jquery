@@ -1,12 +1,26 @@
-window.jQuery = function (selectorOrArray) {
+window.$ = window.jQuery = function (selectorOrArrayOrTemplate) {
   let elements;
-  if (typeof selectorOrArray === "string") {
-    elements = document.querySelectorAll(selectorOrArray);
-  } else if (selectorOrArray instanceof Array) {
-    elements = selectorOrArray;
+  if (typeof selectorOrArrayOrTemplate === "string") {
+    if (selectorOrArrayOrTemplate[0] === "<") {
+      // 创建div
+      elements = [createElement(selectorOrArrayOrTemplate)];
+    } else {
+      elements = document.querySelectorAll(selectorOrArrayOrTemplate);
+    }
+  } else if (selectorOrArrayOrTemplate instanceof Array) {
+    elements = selectorOrArrayOrTemplate;
   }
+
+  function createElement(string) {
+    const container = document.createElement("template");
+    container.innerHTML = string.trim();
+    return container.content.firstChild;
+  }
+
   // api 可以操作 elements
   return {
+    jquery: true,
+    elements: elements,
     // 查找子元素
     find(selector) {
       let array = [];
@@ -17,6 +31,15 @@ window.jQuery = function (selectorOrArray) {
       }
       array.oldApi = this; //this 就是Api
       return jQuery(array);
+    },
+    // 添加节点
+    appendTo(node) {
+      if (node instanceof Element) {
+        this.each((el) => node.appendChild(el));
+      } else if (node.jquery === true) {
+        this.each((el) => node.get(0).appendChild(el));
+      }
+      return this;
     },
     // 遍历节点
     each(fn) {
@@ -97,9 +120,94 @@ window.jQuery = function (selectorOrArray) {
       }
       return this;
     },
-    oldApi: selectorOrArray.oldApi,
+    oldApi: selectorOrArrayOrTemplate.oldApi,
     end() {
       return this.oldApi;
+    },
+    remove() {
+      const array = [];
+      this.each((el) => {
+        el.parentNode.removeChild(el);
+        array.push(el);
+      });
+      return jQuery(array);
+    },
+    empty() {
+      const array = [];
+      this.each((el) => {
+        while (el.firstChild) {
+          el.removeChild(el.firstChild);
+          array.push(el.firstChild);
+        }
+      });
+      return jQuery(array);
+    },
+    text(string) {
+      if (arguments.length === 1) {
+        this.each((el) => {
+          if ("innerText" in el) {
+            el.innerText = string;
+          } else {
+            el.textContent = string;
+          }
+        });
+      } else if (arguments.length === 0) {
+        const array = [];
+        this.each((el) => {
+          if ("innerText" in el) {
+            array.push(el.innerText);
+          } else {
+            array.push(el.textContent);
+          }
+        });
+        return array;
+      }
+      return this;
+    },
+    html(string) {
+      if (arguments.length === 1) {
+        this.each((el) => (el.innerHTML = string));
+        return this;
+      } else if (arguments.length === 0) {
+        const array = [];
+        this.each((el) => array.push(el.innerHTML));
+        return array;
+      }
+    },
+    attr(title, value) {
+      if (arguments.length === 2) {
+        this.each((el) => el.setAttribute(title, value));
+      } else if (arguments.length === 1) {
+        const array = [];
+        this.each((el) => {});
+        return array;
+      }
+      return this;
+    },
+    css(name) {
+      if (typeof name === "string") {
+        const array = [];
+        this.each((el) => array.push(el.style[name]));
+        return array;
+      } else if (name instanceof Object) {
+        this.each((el) => {
+          for (const key in name) {
+            if (name.hasOwnProperty(key)) {
+              el.style[key] = name[key];
+            }
+          }
+        });
+      }
+      return this;
+    },
+    addClass(className) {
+      return this.each((el) => el.classList.add(className));
+    },
+    on(event, fn) {
+      return this.each((el) => el.addEventListener(event, fn));
+    },
+    off(event, fn) {
+      return this.removeEventListener(event, fn);
     },
   };
 };
