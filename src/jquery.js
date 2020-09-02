@@ -30,18 +30,21 @@ window.$ = window.jQuery = function (selectorOrArrayOrTemplate) {
   return api;
 };
 
-jQuery.prototype = {
+jQuery.fn = jQuery.prototype = {
+  constructor: jQuery,
   jquery: true,
   get(index) {
-    return elements[index];
+    return this.elements[index];
   },
   // 查找子元素
   find(selector) {
     let array = [];
-    for (let i = 0; i < elements.length; i++) {
-      array = array.concat(Array.from(elements[i].querySelectorAll(selector)));
+    for (let i = 0; i < this.elements.length; i++) {
+      array = array.concat(
+        Array.from(this.elements[i].querySelectorAll(selector))
+      );
     }
-    array.oldApi = this; //this 就是Api
+    array.oldApi = this; //this 就是旧api
     return jQuery(array);
   },
   // 添加节点
@@ -51,7 +54,6 @@ jQuery.prototype = {
     } else if (node.jquery === true) {
       this.each((el) => node.get(0).appendChild(el));
     }
-    return this;
   },
   append(children) {
     if (children instanceof Element) {
@@ -66,8 +68,8 @@ jQuery.prototype = {
   },
   // 遍历节点
   each(fn) {
-    for (let i = 0; i < elements.length; i++) {
-      fn.call(null, elements[i], i);
+    for (let i = 0; i < this.elements.length; i++) {
+      fn.call(null, this.elements[i], i);
     }
     return this;
   },
@@ -133,12 +135,12 @@ jQuery.prototype = {
     return jQuery(array);
   },
   print() {
-    console.log(elements);
+    console.log(this.elements);
   },
   // 闭包：函数访问外部的变量
   addClass(className) {
-    for (let i = 0; i < elements.length; i++) {
-      const element = elements[i];
+    for (let i = 0; i < this.elements.length; i++) {
+      const element = this.elements[i];
       element.classList.add(className);
     }
     return this;
