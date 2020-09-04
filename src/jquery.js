@@ -2,12 +2,14 @@ window.$ = window.jQuery = function (selectorOrArrayOrTemplate) {
   let elements;
   if (typeof selectorOrArrayOrTemplate === "string") {
     if (selectorOrArrayOrTemplate[0] === "<") {
-      // 创建div
+      // 说明是标签，创建标签
       elements = [createElement(selectorOrArrayOrTemplate)];
     } else {
+      // 说明是选择器
       elements = document.querySelectorAll(selectorOrArrayOrTemplate);
     }
   } else if (selectorOrArrayOrTemplate instanceof Array) {
+    // 说明是元素数组
     elements = selectorOrArrayOrTemplate;
   }
 
