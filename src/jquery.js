@@ -229,8 +229,21 @@ jQuery.fn = jQuery.prototype = {
   addClass(className) {
     return this.each((el) => el.classList.add(className));
   },
-  on(event, fn) {
-    return this.each((el) => el.addEventListener(event, fn));
+  on(event, selector, fn) {
+    this.each((element) =>
+      element.addEventListener(event, (e) => {
+        const el = e.target;
+        while (!el.matches(selector)) {
+          if (element === el) {
+            el = null;
+            break;
+          }
+          el = el.parentNode();
+        }
+        el && fn.call(el, e, el);
+      })
+    );
+    return this;
   },
   off(event, fn) {
     return this.removeEventListener(event, fn);
